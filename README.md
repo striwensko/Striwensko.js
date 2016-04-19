@@ -20,14 +20,14 @@ If you are using jquery just for being able to make Ajax requests, and a couple 
 The concept behind this library is help you build your projects here is a list of examples without the use of any other libraries or frameworks of the use of this library.
 
 1. Load External Ajax Data (JSON_Loader class)
-* [Load the 30 most popular js projects from Github] (https://jsfiddle.net/9ph3x41e/4/) 
+[Load the 30 most popular js projects from Github] (https://jsfiddle.net/9ph3x41e/4/) 
 2. Make Smooth Animations (TimeLine class)
-* [Make an object move on screen] (https://jsfiddle.net/ovu6u4hm/6/)
+[Make an object move on screen] (https://jsfiddle.net/ovu6u4hm/6/)
 3. Add mouse/touch interactions (DragTouch class)
-* [Create a slider mobile/mouse ready] (https://jsfiddle.net/k1v4g5rw/3/)
+[Create a slider mobile/mouse ready] (https://jsfiddle.net/k1v4g5rw/3/)
 4. DispatchEvents (ADD_EVENT_DISPATCHER function)
-* [Create a slider mobile/mouse ready] (https://jsfiddle.net/k1v4g5rw/3/)
-* [Create a radio button] (https://jsfiddle.net/skx8px2z/6/)
+[Create a slider mobile/mouse ready] (https://jsfiddle.net/k1v4g5rw/3/)
+[Create a radio button] (https://jsfiddle.net/skx8px2z/6/)
 
 ## Importance of Dispatching Events
 
