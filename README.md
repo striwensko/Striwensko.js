@@ -33,3 +33,6 @@ The concept behind this library is help you build your projects here is a list o
 
 I really like to make a point in here cause in js we have this popular thing call callback hell, in which you have a path of callback that at some point becomes so big and complex that is very hard to follow. Dispatching Events helps with this problem since eveythin is very explicit and it forces you into not nesting function inside functions keep things apart, and forces you instead of having a path of 6 callbacks, have 6 simple paths of event->action.
 
+## Documentation
+
+[http://striwensko.github.io/] Documentation of Striwensko.js
