@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: TIMER.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: TIMER.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * TimeLine is the class to build animations base on a time basis, which is very flexible. 
+ * Think of the timeline as a timer that you an stop, pause and play. From which you can extract a value
+ * of a small window of time, which is 0 before the window, 1 after, 0-1 in the middle.
+ * @class
+ * @param {number} duration The duration of the timeline in milliseconds
+ * @property {string}  status         - The current status of the timeline
+ * @property {string}  position       - The current time (position) of the timeline
+ * @property {string}  direction      - When 1 timeline will run forward (from position to duration) when -1 i'll run backward  (from position to 0)
+*	@example &lt;caption>Moves an element from 0 to 500px in 2 seconds with a button to toggle the animation direction. You need to click the button to start animation.&lt;/caption>
+*	var timeLine = new TimeLine(600);
+*	// Start with direction -1 so when the button is press we get the direction to 1 at the first click
+*	timeLine.direction = -1;
+*	timeLine.addEventListener(Event.CHANGE, 'render', timeLine);
+*	// This element has style position to absolute;
+*	var element = document.getElementById('ball');
+*	var button = document.getElementById('button');
+*	button.onmousedown = function()
+*	{
+*		// Toggle direction of the timeLine and plays it
+*		timeLine.direction = (timeLine.direction == 1) ? -1 : 1;
+*		timeLine.play();
+*	}
+*	timeLine.render = function()
+*	{
+*		element.style.paddingTop = 300 * timeLine.getTime(100, 400) + 'px';
+*	}
+*   @fires Event:CHANGE When there has been a change in the timeline and therefore rendering needs to be performed
+*   @fires Event:COMPLETE When the timeline is complete
+*	@see {@link https://jsfiddle.net/ovu6u4hm/6/} Online Sample
+*/
+
+function TimeLine(duration, interval)
+{
+	this.duration = duration;
+	this.direction = 1;
+	this._position = 0;
+	this.status = "STOP";
+	this.startTime = 0;
+	this.interval = interval;
+	
+	this.intervalObj;
+	
+	this.data = {};
+	this.events = {}
+	
+	
+	
+	ADD_EVENT_DISPATCHER(this);
+	
+	var self = this;
+	var iFrame = 0;
+	this.REQ_ANIMATION = function(timeStamp){self.update();/*console.log(timeStamp, iFrame);iFrame++;*/}
+}
+
+/**
+* Makes the timeline start running
+* 
+*/
+TimeLine.prototype.play = function ()
+{
+	if (((this.direction == 1) &amp;&amp; (this._position == this.duration)) || ((this.direction == -1) &amp;&amp; (this._position == 0)))
+	{
+	}
+	else
+	{
+		this.startTime = new Date().getTime() - this._position;
+		if (this.status != 'PLAY')
+		{
+			var self = this;
+			var doAnimation = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.oRequestAnimationFrame;
+			
+			if (doAnimation)
+			{
+				doAnimation(this.REQ_ANIMATION);
+			}
+			else
+			{
+				var self = this;
+				this.intervalObj = setInterval(function(){self.update()}, this.interval);
+			}
+		}
+		this.status = 'PLAY';
+	}
+}
+/**
+* Makes the timeline pause running
+* 
+*/
+TimeLine.prototype.pause = function ()
+{
+	this.status = 'PAUSE';
+	clearInterval(this.intervalObj);
+}
+/**
+* Makes the timeline stop running
+* 
+*/
+TimeLine.prototype.stop = function ()
+{
+	this.status = 'STOP';
+	clearInterval(this.intervalObj);
+}
+
+Object.defineProperty(TimeLine.prototype, 'position', {
+		get:function(){
+			return this._position
+		},
+		set:function(value){
+			this._position = value;
+			this.startTime = new Date().getTime() - this._position;
+		},
+	configurable:true});
+
+
+
+TimeLine.prototype.update = function ()
+{
+	if (!Date.now)
+	{
+		Date.now = function()
+		{
+			return new Date().getTime();
+		};
+	}
+	if (this.status != 'PLAY')
+	{
+		return false;
+	}
+	var TIME = Date.now();
+	if (this.direction == 1)
+	{
+		this._position =  TIME - this.startTime;
+		this._position = Math.min(this.duration, this._position);
+		if (this._position == this.duration)
+		{
+			this.status = 'STOP';
+			clearInterval(this.intervalObj);
+			this.dispatchEvent(Event.COMPLETE);
+			
+			if (this.onComplete)
+			{
+				this.onComplete();
+			}
+		}
+		else if (this.status == 'PLAY')
+		{
+			var doAnimation = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.oRequestAnimationFrame;
+			
+			if (doAnimation)
+			{
+				doAnimation(this.REQ_ANIMATION);
+			}
+		}
+	}
+	else
+	{
+		this._position = Math.max((2 * this._position) - (TIME - this.startTime), 0);
+		this.startTime = TIME - this._position;
+		if (this._position == 0)
+		{
+			this.status = 'STOP';
+			clearInterval(this.intervalObj);
+			this.dispatchEvent(Event.COMPLETE);
+			
+			if (this.onComplete)
+			{
+				this.onComplete();
+			}
+		}
+		else if (this.status == 'PLAY')
+		{
+			var doAnimation = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.oRequestAnimationFrame;
+			
+			if (doAnimation)
+			{
+				doAnimation(this.REQ_ANIMATION);
+			}
+		}
+	}
+	
+	this.dispatchEvent(Event.CHANGE);
+}
+
+
+/**
+*	Extracts the time from the timeline, the value is between 0-1, 0 when the position is timeOffset and 1 when the 
+*	position is timeOffset + duration. Additionally you can an easeFuncion to create easing effects
+*	@param {number} timeOffset The time you are considering as the start
+*	@param {number} duration The time to be added to timeOffset which will be considered the end
+*	@param {function} easeFunction A function that can modify the easing effect by default an Sine.easeInOut is apply
+*   @returns {Number} [0-1] Returns the time of the timeLine relative to timeOffset and (timeOffset + duration)
+*	@example &lt;caption>Extract time between 100ms and 500ms, to add paddingTop  from 0 to 300&lt;/caption>
+*	var timeLine = new TimeLine(1000);
+*	timeLine.addEventListener(Event.CHANGE, 'render', this);
+*	var element = document.getElementById('ball');
+*	function render()
+*	{
+*		element.style.paddingTop = 300 * timeLine.getTime(100, 400) + 'px';
+*	}
+*	timeLine.play();
+*/
+
+TimeLine.prototype.getTime = function(timeOffset, duration, easeFunction)
+{
+	var time = Math.min(Math.max(this._position - timeOffset, 0), duration);
+	if (easeFunction != null)
+	{
+		return easeFunction(time, 0, 1, duration);
+	}
+	return this.easeInOut(time, 0, 1, duration);
+}
+
+TimeLine.prototype.easeInOut = function (t, b, c, d)
+{
+	return -c / 2 * (Math.cos(Math.PI * t / d) - 1) + b;
+}
+
+
+TimeLine.prototype.easeInOutPos = function (pos, b, c, d)
+{
+	return  Math.acos(-(pos - b) * (2 / c)  + 1) * d / Math.PI;
+}
+
+TimeLine.applyMatrix = function(elements, matrix)
+{
+	elements = (elements.constructor == Array) ? elements : [elements];
+	if (!matrix)
+	{
+		for (var iElem = 0; iElem &lt; elements.length; iElem++)
+		{
+			var element = elements[iElem];
+			element.style.transform = "";
+			element.style.MozTransform = "";
+			element.style.WebkitTransform = "";
+			element.style.msTransform = "";
+			element.style.OTransform = "";
+		}
+		return false;
+	}
+	
+	var scale = (matrix.hasOwnProperty('scale') ? matrix.scale : 1);
+	var scaleX = (matrix.hasOwnProperty('scaleX') ? matrix.scaleX * scale : scale);
+	var scaleY = (matrix.hasOwnProperty('scaleY') ? matrix.scaleY * scale : scale);
+	var rotation = (matrix.hasOwnProperty('rotation') ? matrix.rotation : 0) * (180 / Math.PI);
+	var x = (matrix.hasOwnProperty('x') ? matrix.x : 0);
+	var y = (matrix.hasOwnProperty('y') ? matrix.y : 0);
+	var opacity = (matrix.hasOwnProperty('opacity') ? matrix.opacity : 1);
+	
+	if (matrix.hasOwnProperty('radius') &amp;&amp; matrix.hasOwnProperty('angle'))
+	{
+		var radius = matrix.radius;
+		var angle = matrix.angle;
+		
+		x = Math.round(radius * Math.cos(angle * Math.PI / 180) * 100) / 100 + x;
+		y = Math.round(radius * Math.sin(angle * Math.PI / 180) * 100) / 100 + y;
+		
+	}
+	
+	
+	var data = [scaleX * Math.cos(rotation), -Math.sin(rotation)       ,
+			    Math.sin(rotation)        , scaleY * Math.cos(rotation), x, y];
+	
+	
+	var transform = 'matrix(' + data.join(',') + ')';
+	
+	
+	for (var iElem = 0; iElem &lt; elements.length; iElem++)
+	{
+		var enableTransform = false;
+		var element = elements[iElem];
+		if (!element.animation)
+		{
+			element.animation = {};
+		}
+		if (element.animation.x != x)
+		{
+			element.animation.x = x;
+			enableTransform = true;
+		}
+		if (element.animation.y != y)
+		{
+			element.animation.y = y;
+			enableTransform = true;
+		}
+		if (element.animation.scaleX != scaleX)
+		{
+			element.animation.scaleX = scaleX;
+			enableTransform = true;
+		}
+		if (element.animation.scaleY != scaleY)
+		{
+			element.animation.scaleY = scaleY;
+			enableTransform = true;
+		}
+		if (element.animation.rotation != matrix.rotation)
+		{
+			element.animation.rotation = matrix.rotation;
+			enableTransform = true;
+		}
+		if (matrix.hasOwnProperty('opacity'))
+		{
+			if (element.animation.opacity != opacity)
+			{
+				element.style.opacity = opacity;
+				element.animation.opacity = opacity;
+			}
+		}
+		
+		if (enableTransform)
+		{
+			element.style.transform = transform;
+			element.style.MozTransform = transform;
+			element.style.WebkitTransform = transform;
+			element.style.msTransform = transform;
+			element.style.OTransform = transform;
+		}
+		
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * This is a static class which only purpose is to scroll to y position the current page. You dont need to create an
+ * instance to use it
+ * @static
+ * @class
+ * @see {@link https://jsfiddle.net/12ew84gc/} Online Demo
+ */
+var Scroll = {};
+Scroll.end;
+Scroll.timeLine = new TimeLine(500, 33);
+Scroll.timeLine.addEventListener(Event.CHANGE, 'refresh', Scroll);
+/**
+*	Makes the page scroll to the specify position
+*	@param {number} position The y position at which you want to scroll
+*	@example &lt;caption>Scrolls the page to scrollTop at 600px when the div is click&lt;/caption>
+*	&lt;div onclick="Scroll.go(600)">Scroll to 600px&lt;/div>
+*/
+Scroll.go = function(position, scrollTop)
+{
+	Scroll.start = scrollTop || document.body.scrollTop || document.documentElement.scrollTop;
+	Scroll.end = position;
+	
+	Scroll.timeLine.duration = Math.min(Math.max(200, Math.abs(Scroll.end - Scroll.start) * 1.5), 1500);
+	Scroll.timeLine.position = 0;
+	Scroll.timeLine.play();
+}
+Scroll.refresh = function()
+{
+	var position = Scroll.start + (Scroll.end - Scroll.start) * Scroll.timeLine.getTime(0, Scroll.timeLine.duration);
+	document.body.scrollTop = position
+	document.documentElement.scrollTop = position;
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="DragTouch.html">DragTouch</a></li><li><a href="Event_Dispatcher.html">Event_Dispatcher</a></li><li><a href="ImageUploader.html">ImageUploader</a></li><li><a href="JSON_Loader.html">JSON_Loader</a></li><li><a href="Scroll.html">Scroll</a></li><li><a href="TimeLine.html">TimeLine</a></li></ul><h3>Events</h3><ul><li><a href="Event.html#event:CANCEL">CANCEL</a></li><li><a href="Event.html#event:CHANGE">CHANGE</a></li><li><a href="Event.html#event:CLOSE">CLOSE</a></li><li><a href="Event.html#event:COMPLETE">COMPLETE</a></li><li><a href="Event.html#event:ERROR">ERROR</a></li><li><a href="Event.html#event:FOCUS_IN">FOCUS_IN</a></li><li><a href="Event.html#event:FOCUS_OUT">FOCUS_OUT</a></li><li><a href="Event.html#event:MOVE">MOVE</a></li><li><a href="Event.html#event:OPEN">OPEN</a></li><li><a href="Event.html#event:PROGRESS">PROGRESS</a></li><li><a href="Event.html#event:REFRESH">REFRESH</a></li><li><a href="Event.html#event:REMOVE">REMOVE</a></li><li><a href="Event.html#event:RENDER">RENDER</a></li><li><a href="Event.html#event:RESIZE">RESIZE</a></li><li><a href="Event.html#event:SELECT">SELECT</a></li><li><a href="Event.html#event:SOUND_COMPLETE">SOUND_COMPLETE</a></li><li><a href="Event.html#event:START">START</a></li><li><a href="Event.html#event:STATE_CHANGE">STATE_CHANGE</a></li><li><a href="Event.html#event:STOP">STOP</a></li><li><a href="Event.html#event:UPLOAD">UPLOAD</a></li></ul><h3>Global</h3><ul><li><a href="global.html#ADD_EVENT_DISPATCHER">ADD_EVENT_DISPATCHER</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.0</a> on Tue Apr 19 2016 07:54:02 GMT-0500 (Hora de verano central (México))
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
