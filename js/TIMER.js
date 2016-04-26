@@ -353,6 +353,11 @@ Scroll.timeLine.addEventListener(Event.CHANGE, 'refresh', Scroll);
 Scroll.go = function(position, scrollTop)
 {
 	Scroll.start = scrollTop || document.body.scrollTop || document.documentElement.scrollTop;
+	if (position.nodeType)
+	{
+		position = position.getBoundingClientRect().top + Scroll.start;
+	}
+	
 	Scroll.end = position;
 	
 	Scroll.timeLine.duration = Math.min(Math.max(200, Math.abs(Scroll.end - Scroll.start) * 1.5), 1500);

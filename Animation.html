@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	
+	<script type="text/javascript" charset="utf-8" src="js/LIBRARY.js"></script>
+	
+	<style type="text/css">
+		
+		
+		
+		
+		
+		html, body
+		{
+			height: 100%;
+			margin: 0;
+			padding: 0;
+			color: #00ff00;
+  font-family: "ProximaNovaLight", "Helvetica Neue", Helvetica, Arial, sans-serif;
+		}
+		
+		
+	</style>
+	<script type="text/javascript">
+		
+		function start()
+		{
+			var canvas = document.createElement('canvas');
+			canvas.style.position = 'absolute';
+			canvas.style.top = '0';
+			canvas.style.left = '0';
+			canvas.width = 470;
+			canvas.height = 303;
+			var context = canvas.getContext('2d');
+			document.getElementById('holder').appendChild(canvas);
+			
+			var timeLine = new TimeLine(10000);
+			timeLine.addEventListener(Event.CHANGE, 'render', timeLine);
+			timeLine.render = function()
+			{
+				if (timeLine.position > 1000)
+				{
+					context.clearRect(0, 0, 470, 303);
+					context.fillStyle = 'rgba(255, 255, 255, 0.7)';
+					var tmpY = 303 - 30 - 60 * timeLine.getTime(1000, 1500);
+					context.fillRect(50, tmpY, 470 - 100, 26);
+					
+					var logo = document.getElementById('logo');
+					context.drawImage(logo, 55, tmpY + 3)
+					
+					context.fillStyle = 'rgba(0, 152, 255, 0.7)';
+					context.fillRect(50, tmpY + 26, 470 - 100, 34);
+					context.clearRect(0, 303 - 30, 470, 30);
+					
+					if (tmpY < 303 - 30 - 26)
+					{
+						context.save();
+						context.rect(50, tmpY + 26, 470 - 100, tmpY - (303 - 30));
+						context.clip();
+						
+						context.font = "20px Arial";
+						context.fillStyle = '#fff';
+						context.fillText("Juan Carlos Manajarrez", 60, 27 + tmpY + 26 - (22 * (1 - this.getTime(1000, 1500)))); 
+						
+						
+						context.restore();
+					}
+					
+				}
+			}
+			timeLine.direction = 1;
+			timeLine.play();
+		}
+		window.onload = start;
+	</script>
+</head>
+<body style="margin:0;" class="desktop" data-layout="layout">
+
+	<div id="holder">
+		<img id="logo" src="images/DW_(TV)_Logo_2012.png" style="display:none"/>
+		<img src="http://designcollector.net/files/Juan-Carlos-Manjarrez.jpg" width="470" height="303"/>
+	</div>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
