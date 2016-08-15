@@ -5,7 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 	
 	<script type="text/javascript" charset="utf-8" src="js/LIBRARY.js"></script>
-	
+	<script type="text/javascript" src="js/HTML.js"></script>
 	<style type="text/css">
 		
 		
@@ -37,14 +37,14 @@
 			document.getElementById('holder').appendChild(canvas);
 			
 			var timeLine = new TimeLine(10000);
-			timeLine.addEventListener(Event.CHANGE, 'render', timeLine);
+			timeLine.addEventListener(Event.CHANGE, 'render');
 			timeLine.render = function()
 			{
 				if (timeLine.position > 1000)
 				{
 					context.clearRect(0, 0, 470, 303);
 					context.fillStyle = 'rgba(255, 255, 255, 0.7)';
-					var tmpY = 303 - 30 - 60 * timeLine.getTime(1000, 1500);
+					var tmpY = 303 - 30 - 60 * timeLine.getTime(1000, 500);
 					context.fillRect(50, tmpY, 470 - 100, 26);
 					
 					var logo = document.getElementById('logo');
@@ -60,9 +60,9 @@
 						context.rect(50, tmpY + 26, 470 - 100, tmpY - (303 - 30));
 						context.clip();
 						
-						context.font = "20px Arial";
+						context.font = "12px Arial";
 						context.fillStyle = '#fff';
-						context.fillText("Juan Carlos Manajarrez", 60, 27 + tmpY + 26 - (22 * (1 - this.getTime(1000, 1500)))); 
+						context.fillText("Juan Carlos Manajarrez", 60, 27 + tmpY + 26 - (22 * (1 - this.getTime(1000, 500)))); 
 						
 						
 						context.restore();

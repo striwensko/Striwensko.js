@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	
+	<script type="text/javascript" charset="utf-8" src="js/LIBRARY.js"></script>
+	<script type="text/javascript" src="js/HTML.js"></script>
+	<style type="text/css">
+		
+		
+		
+		
+		
+		html, body
+		{
+			height: 100%;
+			margin: 0;
+			padding: 0;
+			color: #00ff00;
+  font-family: "ProximaNovaLight", "Helvetica Neue", Helvetica, Arial, sans-serif;
+		}
+		
+		
+		
+		
+		
+		.closeButton
+		{
+			position:absolute;
+			top:0;
+			right:0;
+		}
+		.closeButton b
+		{
+			background-size: 30px 30px;
+			background-image:url(../images/eraseButton.png);
+			background-position:center center;
+			background-repeat:no-repeat;
+			background-color:rgba(0, 0, 0, 0.1);
+			border-radius:25px;
+			-moz-border-radius:25px;
+			-webkit-border-radius:25px;
+			width:50px;
+			height:50px;
+			position:absolute;
+			top:-25px;
+			right:-25px;
+			z-index:10;
+			cursor:pointer;
+		}
+		
+		.window
+		{
+			position:fixed; top:0; left:0; width:100%; height:100%;
+			background-color:rgba(0, 0, 0, 0.5);
+			z-index:2000;
+		}
+		.window > div
+		{
+			position:absolute;
+			border-radius:10px;
+			top:20px;
+			left:20px;
+			padding:15px;
+			background-color:#FFFFFF;
+			border-radius:10px;
+		}
+		.window > div > div
+		{
+			width:300px;
+			height:300px;
+			
+			top:20px;
+			left:20px;
+			padding:20px;
+			overflow-y:scroll;
+		}
+		.window > div > div:after
+		{
+			content:"";
+			display:block;
+			clear:both;
+		}
+		.window > div > div > div
+		{
+			width:25%;
+			height:100px;
+			position:relative;
+			float:left;
+			margin-bottom:20px;
+		}
+		.window > div > div > div img
+		{
+			display: block;
+			margin: 0 auto;
+			max-width: 100%;
+			max-height: 100%;
+			position: relative;
+			top: 50%;
+			-webkit-transform: translateY(-50%);
+			-ms-transform: translateY(-50%);
+			transform: translateY(-50%);
+			z-index: 1;
+			cursor:pointer;
+		}
+		
+		@media only screen and (max-width: 640px)
+		{
+			.window > div > div > div
+			{
+				width:33%;
+			}
+		}
+		@media only screen and (max-width: 420px)
+		{
+			.window > div > div > div
+			{
+				width:50%;
+			}
+		}
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		.tabsBar
+		{
+			line-height: 40px;
+			font-size: 13px;
+			color: #2C3155;
+			display: block;
+			margin: 0 auto;
+			background-color: #333;
+		}
+		.tabsBar b
+		{
+			float: left;
+			display: inline-block;
+			text-align: center;
+			cursor: pointer;
+			padding: 0 20px;
+			border-right: 1px solid #fff;
+			color: #fff;
+			background-color: #333;
+		}
+		.tabsBar b.select
+		{
+			background-color: #55A4FF;
+			color: #fff;
+		}
+		
+		.tabsBar:after
+		{
+			display: block;
+			content: '';
+			clear: both;
+		}
+	</style>
+	<script type="text/javascript">
+		
+		function start()
+		{
+			var stickerFilters = new TabsBar();
+			stickerFilters.addItem({name:'ALL', value:'*'});
+			stickerFilters.addItem({name:'Cat A', value:'0'});
+			stickerFilters.addItem({name:'Cat B', value:'1'});
+			stickerFilters.addItem({name:'Cat C', value:'2'});
+			stickerFilters.setValue('*');
+			stickerFilters.addEventListener(Event.CHANGE, 'onChange');
+			document.getElementById('stampIn').parentNode.insertBefore(stickerFilters.holder, document.getElementById('stampIn'));
+
+			stickerFilters.onChange = function(event)
+			{
+				var filter = event.currentTarget.getValue();
+				var holder = document.getElementById('stampIn');
+				var images = holder.getElementsByTagName('img');
+				
+				for (var iImg = 0; iImg < images.length; iImg++)
+				{
+					var container = images[iImg].parentNode;
+					var image = images[iImg];
+					console.log(iImg, image.getAttribute('filter'), filter);
+					if (filter == '*')
+					{
+						container.style.display = '';
+					}
+					else
+					{
+						container.style.display = ((image.getAttribute('filter') == filter) ? '' : 'none');
+					}
+					
+				}
+				console.log(filter);
+			}
+		}
+		
+		
+		
+		function TabsBar()
+		{
+		  this.holder = document.createElement('span');
+		  this.holder.className = 'tabsBar';
+
+		  this.items = [];
+		  ADD_EVENT_DISPATCHER(this);
+		}
+		TabsBar.prototype.addItem = function(data)
+		{
+		  var self = this;
+		  var item = document.createElement('b');
+		  item.innerHTML = data.name;
+		  item.data = data;
+		  item.onmousedown = function()
+		  {
+			self.setValue(this.data.value);
+			self.dispatchEvent(Event.CHANGE);
+		  }
+		  this.holder.appendChild(item);
+		  this.items.push(item);
+		}
+		TabsBar.prototype.setValue = function(value)
+		{
+		  this.value = value;
+		  for (var iItem = 0; iItem < this.items.length; iItem++)
+		  {
+			this.items[iItem].className = (this.items[iItem].data.value == value) ? 'select' : '';
+		  }
+		}
+		TabsBar.prototype.getValue = function(value)
+		{
+		  return this.value;
+		}
+		
+		
+		window.onload = start;
+	</script>
+</head>
+<body style="margin:0;" class="desktop" data-layout="layout">
+
+<div id="stampPanel" class="window">
+    <div id="stampWindow" style="top: 117px; left: 20px;">
+        <u class="closeButton" onmousedown="closeStickerPanel();"><b></b></u>
+		
+        <div id="stampIn" style="width: 513px; height: 640px;">
+            <div><img src="http://www.tweematic.com/rickross/assets/asset_18.png" onmousedown="javascript:addSticker('http://www.tweematic.com/rickross/assets/asset_18.png');" filter="2">
+            </div>
+            <div><img src="http://www.tweematic.com/rickross/assets/asset_19.png" onmousedown="javascript:addSticker('http://www.tweematic.com/rickross/assets/asset_19.png');" filter="2">
+            </div>
+            <div><img src="http://www.tweematic.com/rickross/assets/asset_20.png" onmousedown="javascript:addSticker('http://www.tweematic.com/rickross/assets/asset_20.png');" filter="0">
+            </div>
+            <div><img src="http://www.tweematic.com/rickross/assets/asset_17.png" onmousedown="javascript:addSticker('http://www.tweematic.com/rickross/assets/asset_17.png');" filter="2">
+            </div>
+            <div><img src="http://www.tweematic.com/rickross/assets/asset_16.png" onmousedown="javascript:addSticker('http://www.tweematic.com/rickross/assets/asset_16.png');" filter="1">
+            </div>
+            <div><img src="http://www.tweematic.com/rickross/assets/asset_14.png" onmousedown="javascript:addSticker('http://www.tweematic.com/rickross/assets/asset_14.png');" filter="2">
+            </div>
+            <div><img src="http://www.tweematic.com/rickross/assets/asset_12.png" onmousedown="javascript:addSticker('http://www.tweematic.com/rickross/assets/asset_12.png');" filter="0">
+            </div>
+            <div><img src="http://www.tweematic.com/rickross/assets/asset_13.png" onmousedown="javascript:addSticker('http://www.tweematic.com/rickross/assets/asset_13.png');" filter="1">
+            </div>
+            <div><img src="http://www.tweematic.com/rickross/assets/asset_6.png" onmousedown="javascript:addSticker('http://www.tweematic.com/rickross/assets/asset_6.png');" filter="0">
+            </div>
+            <div><img src="http://www.tweematic.com/rickross/assets/asset_10.png" onmousedown="javascript:addSticker('http://www.tweematic.com/rickross/assets/asset_10.png');" filter="0">
+            </div>
+            <div><img src="http://www.tweematic.com/rickross/assets/asset_10b.png" onmousedown="javascript:addSticker('http://www.tweematic.com/rickross/assets/asset_10b.png');" filter="1">
+            </div>
+            <div><img src="http://www.tweematic.com/rickross/assets/asset_11.png" onmousedown="javascript:addSticker('http://www.tweematic.com/rickross/assets/asset_11.png');" filter="1">
+            </div>
+            <div><img src="http://www.tweematic.com/rickross/assets/asset_11b.png" onmousedown="javascript:addSticker('http://www.tweematic.com/rickross/assets/asset_11b.png');" filter="2">
+            </div>
+            <div><img src="http://www.tweematic.com/rickross/assets/asset_9.png" onmousedown="javascript:addSticker('http://www.tweematic.com/rickross/assets/asset_9.png');" filter="0">
+            </div>
+            <div><img src="http://www.tweematic.com/rickross/assets/asset_9b.png" onmousedown="javascript:addSticker('http://www.tweematic.com/rickross/assets/asset_9b.png');" filter="1">
+            </div>
+            <div><img src="http://www.tweematic.com/rickross/assets/asset_4.png" onmousedown="javascript:addSticker('http://www.tweematic.com/rickross/assets/asset_4.png');" filter="1">
+            </div>
+            <div><img src="http://www.tweematic.com/rickross/assets/asset_21.png" onmousedown="javascript:addSticker('http://www.tweematic.com/rickross/assets/asset_21.png');" filter="1">
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	
+	<script type="text/javascript" charset="utf-8" src="js/LIBRARY.js"></script>
+	<script type="text/javascript" charset="utf-8" src="js/JSON.js"></script>
+	<script type="text/javascript" src="js/hydra/Checkbox.js"></script>
+	<script type="text/javascript" src="js/hydra/Dropdown.js"></script>
+	<script type="text/javascript" src="js/hydra/Numeric.js"></script>
+	<script type="text/javascript" src="js/hydra/RadioButton.js"></script>
+	<script type="text/javascript" src="js/hydra/TextField.js"></script>
+	<script type="text/javascript" src="js/hydra/Data.js"></script>
+	<script type="text/javascript" src="js/hydra/Table.js"></script>
+	<link href="css/hydra.css" rel="stylesheet"/>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+	<style type="text/css">
+		.form
+		{
+			border: 1px solid #000;
+			padding: 20px;
+			max-width: 400px;
+			margin: 0 auto;
+		}
+		.product-detail
+		{
+			position: relative;
+			padding-left: 60px;
+		}
+		.product-detail img
+		{
+			position: absolute;
+			top: 10px;
+			left: 10px;
+			width: 40px;
+			height: 40px;
+			border-radius: 40px;
+			overflow: hidden;
+		}
+		.product-detail b
+		{
+			padding-top: 10px;
+			line-height: 20px;
+			display: block;
+			color: #fff;
+			font-size: 16px;
+			font-weight: normal;
+			text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+			display: block;
+		}
+		.product-detail span
+		{
+			line-height: 20px;
+			    color: #7F8FA4;
+    display: block;
+			padding-bottom: 10px;
+		}
+	</style>
+	<script type="text/javascript">
+		
+		var listModel = {
+			src: 'zoho.php?request=LIST',
+			title: 'Contact List',
+			parser: function(data)
+			{
+				return {items:data.contacts, length:20, size:10, page:0, pages:2};
+			},
+			columns:
+			[
+				{ "name": "Name", "id": "contact_name", "align": "left"},
+				{ "name": "Company", "id": "company_name", "align": "center" ,  width: 150},
+				{ "name": "Email", "id": "email", "align": "center" ,  width: 150},
+				{ "name": "Edit", width: 100, "align": "center", render(data){
+					var button = document.createElement('div');
+					button.innerHTML = 'Edit';
+					button.onmousedown = function()
+					{
+						var json = new JSON_Loader();
+						json.load('zoho.php?request=GET&id=' + data.contact_id);
+						json.addEventListener(Event.COMPLETE, 'onData', window);
+					}
+					button.className = 'button';
+					return button;
+				}},
+				{ "name": "Delete", width: 100, "align": "center", render(data){
+					var button = document.createElement('div');
+					button.innerHTML = 'Delete';
+					button.onmousedown = function()
+					{
+						var json = new JSON_Loader();
+						json.load('zoho.php?request=DELETE&id=' + data.contact_id);
+						json.addEventListener(Event.COMPLETE, 'onDeleteData', window);
+					}
+					button.className = 'button';
+					return button;
+				}}
+			]
+		}
+		function onDeleteData()
+		{
+			
+		}
+		function onData(event)
+		{
+			console.log(event.currentTarget.data.contact)
+			HYDRA.DATA.apply('contact', event.currentTarget.data.contact);
+		}
+		function save()
+		{
+			var data = HYDRA.DATA.getData(['contact_id', 'contact_name', 'company_name', 'website', 'phone'], 'contact');
+			var json = new JSON_Loader();
+			if (data.contact_id != '')
+			{
+				json.load('zoho.php?request=PUT&id=' + data.contact_id, 'contact_name=' + data.contact_name + '&company_name=' + data.company_name + '&website=' + data.website + '&phone=' + data.phone, null, 'POST');
+			}
+			else
+			{
+				json.load('zoho.php?request=POST' + data.contact_id, 'contact_name=' + data.contact_name + '&company_name=' + data.company_name + '&website=' + data.website + '&phone=' + data.phone, null, 'POST');
+			}
+			
+			
+			json.addEventListener(Event.COMPLETE, 'onSaveData', window);
+		}
+		function onSaveData(event)
+		{
+			console.log(event);
+			HYDRA.DATA.apply('contact', event.currentTarget.data.contact);
+		}
+		
+		function start()
+		{
+			var textfield = new HYDRA.TextField({});
+			textfield.setValue('id');
+			document.getElementById('form').appendChild(textfield.holder);
+			HYDRA.DATA.addField(textfield, 'contact_id', 'contact');
+			
+			var textfield = new HYDRA.TextField({});
+			textfield.setValue('name');
+			document.getElementById('form').appendChild(textfield.holder);
+			HYDRA.DATA.addField(textfield, 'contact_name', 'contact');
+			
+			var textfield = new HYDRA.TextField({});
+			textfield.setValue('company');
+			document.getElementById('form').appendChild(textfield.holder);
+			HYDRA.DATA.addField(textfield, 'company_name', 'contact');
+			
+			var textfield = new HYDRA.TextField({});
+			textfield.setValue('website');
+			document.getElementById('form').appendChild(textfield.holder);
+			HYDRA.DATA.addField(textfield, 'website', 'contact');
+			
+			
+			var table = new HYDRA.Table(listModel);
+			table.load();
+			document.body.appendChild(table.holder);
+		}
+		
+		window.onload = start;
+	</script>
+</head>
+<body style="margin:0;" class="desktop" data-layout="layout">
+	<div onmousedown="save()">Save</div>
+	<div id="form" class="form"></div>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

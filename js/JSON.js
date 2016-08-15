@@ -19,7 +19,7 @@ JSON_Loader.prototype.abort = function ()
 }
 JSON_Loader.prototype.send = function(data)
 {
-	this.load(data.url, data.data, data.contentType || null, data.requestMedthod || null, data.headers || null);
+	this.load(data.url, data.data, data.contentType || null, data.requestMethod || null, data.headers || null);
 }
 /**
 *	Use to load a json
@@ -34,7 +34,6 @@ JSON_Loader.prototype.load = function (url, parameters, contentType, requestMeth
 		this.isReady = false;
 		
 		var self = this;
-
 
 		if (this.request)
 		{
@@ -120,7 +119,7 @@ JSON_Loader.prototype.load = function (url, parameters, contentType, requestMeth
 					}
 					else
 					{
-						console.log('error:' + self.url + ',' + e);
+						console.log('error:' + self.url + ',' + error);
 						console.log("string:" + (string));
 						self.dispatchEvent(Event.CANCEL);
 					}
@@ -130,8 +129,7 @@ JSON_Loader.prototype.load = function (url, parameters, contentType, requestMeth
 			}
 			
 		};
-        
-		if (parameters)
+        if (parameters)
 		{
 			this.request.open(requestMethod || "POST", this.url, true)
 			if (contentType)
@@ -145,7 +143,6 @@ JSON_Loader.prototype.load = function (url, parameters, contentType, requestMeth
 			
 			if (headers)
 			{
-				console.log(headers);
 				for (var iHeader = 0; iHeader < headers.length; iHeader++)
 				{
 					console.log(headers[iHeader].name, headers[iHeader].value)

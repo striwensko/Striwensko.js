@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+	
+	<script type="text/javascript" charset="utf-8" src="js/LIBRARY.js"></script>
+	<script type="text/javascript" charset="utf-8" src="js/JSON.js"></script>
+	<script type="text/javascript" src="js/hydra/Checkbox.js"></script>
+	<script type="text/javascript" src="js/hydra/Dropdown.js"></script>
+	<script type="text/javascript" src="js/hydra/Numeric.js"></script>
+	<script type="text/javascript" src="js/hydra/RadioButton.js"></script>
+	<script type="text/javascript" src="js/hydra/TextField.js"></script>
+	<script type="text/javascript" src="js/hydra/Dialog.js"></script>
+	<script type="text/javascript" src="js/hydra/Data.js"></script>
+	<script type="text/javascript" src="js/hydra/Table.js"></script>
+	<link href="css/hydra.css" rel="stylesheet"/>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+	<style type="text/css">
+		.form
+		{
+			border: 1px solid #000;
+			padding: 20px;
+			max-width: 400px;
+			margin: 0 auto;
+		}
+		.product-detail
+		{
+			position: relative;
+			padding-left: 60px;
+		}
+		.product-detail img
+		{
+			position: absolute;
+			top: 10px;
+			left: 10px;
+			width: 40px;
+			height: 40px;
+			border-radius: 40px;
+			overflow: hidden;
+		}
+		.product-detail b
+		{
+			padding-top: 10px;
+			line-height: 20px;
+			display: block;
+			color: #fff;
+			font-size: 16px;
+			font-weight: normal;
+			text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+			display: block;
+		}
+		.product-detail span
+		{
+			line-height: 20px;
+			    color: #7F8FA4;
+    display: block;
+			padding-bottom: 10px;
+		}
+	</style>
+	<script type="text/javascript">
+		var searchTable;
+		var listModel = {
+			src: 'wallmart.php?request=trends',
+			title: 'Trending at WallMart',
+			parser: function(data)
+			{
+				return {items:data.items, length:data.totalResults, size:data.numItems, page:Math.floor((data.start - 1) / 10), pages:Math.ceil(data.totalResults / 10)};
+			},
+			columns:
+			[
+				{ "name": "Name", "id": "name", "align": "left", render: function(data){
+					var item = document.createElement('div');
+					item.className = 'product-detail';
+					
+					var image = new Image();
+					image.src = data.thumbnailImage;
+					item.appendChild(image);
+					
+					var name = document.createElement('b');
+					name.innerHTML = data.name;
+					item.appendChild(name);
+					
+					var span = document.createElement('span');
+					span.innerHTML = data.upc;
+					item.appendChild(span);
+					
+					return item;
+				}},
+				{ "name": "Category", "id": "categoryPath", "align": "center" ,  width: 150, render:function(data)
+				{
+					return data.categoryPath.split('/')[0];
+				}},
+				{ "name": "Sub-Category", "id": "categoryPath", "align": "center" ,  width: 150, render:function(data)
+				{
+					return data.categoryPath.split('/')[1];
+				}},
+				{ "name": "Brand", "id": "brandName", width: 200, "align": "center"},
+				{ "name": "Price", "id": "salePrice", width:100, "align": "center", render:function(data)
+				{
+					return HYDRA.Utils.formatNumber(data.salePrice, {decimals:2, prefix:'$'});
+				}},
+			]
+		}
+		var searchModel = {
+			src: 'wallmart.php?request=search&query={query}&categoryId={categoryId}&start={start}&sort={sort}&order={order}',
+			title: 'Search Results',
+			parser: function(data)
+			{
+				return {items:data.items, length:data.totalResults, size:data.numItems, page:Math.floor((data.start - 1) / 10), pages:Math.ceil(data.totalResults / 10)};
+			},
+			columns:
+			[
+				{ "name": "Name", "id": "name", "align": "left", sort:"title", render: function(data){
+					var item = document.createElement('div');
+					item.className = 'product-detail';
+					
+					var image = new Image();
+					image.src = data.thumbnailImage;
+					item.appendChild(image);
+					
+					var name = document.createElement('b');
+					name.innerHTML = data.name;
+					item.appendChild(name);
+					
+					var span = document.createElement('span');
+					span.innerHTML = data.upc;
+					item.appendChild(span);
+					
+					return item;
+				}},
+				{ "name": "Category", "id": "categoryPath", "align": "center" ,  width: 150, render:function(data)
+				{
+					return data.categoryPath.split('/')[0];
+				}},
+				{ "name": "Sub-Category", "id": "categoryPath", "align": "center" ,  width: 150, render:function(data)
+				{
+					var subCategory = data.categoryPath.split('/')[1];
+					subCategory = ((subCategory) ? subCategory : '');
+					return subCategory;
+				}},
+				{ "name": "Price", "id": "salePrice", width:100, sort:"price", "align": "center", render:function(data)
+				{
+					return HYDRA.Utils.formatNumber(data.salePrice, {decimals:2, prefix:'$'});
+				}},
+			]
+		}
+		function start()
+		{
+			var productNameField = new HYDRA.TextField({});
+			productNameField.setValue('name');
+			document.getElementById('form').appendChild(productNameField.holder);
+			
+			var priceField = new HYDRA.Numeric({min:0, addCommas:true, decimals:2, prefix:'$'});
+			priceField.setValue('899.6');
+			document.getElementById('form').appendChild(priceField.holder);
+			
+			
+			
+			var radioButton = new HYDRA.RadioButton({name:'Show Image', value:'image', group:'g0'});
+			document.getElementById('form').appendChild(radioButton.holder);
+			var radioButton = new HYDRA.RadioButton({name:'Show Text', value:'text', group:'g0'});
+			document.getElementById('form').appendChild(radioButton.holder);
+			var radioButton = new HYDRA.RadioButton({name:'Show Link', value:'link', group:'g0'});
+			document.getElementById('form').appendChild(radioButton.holder);
+			
+			var phoneNumberFN = function(value)
+			{
+				if (value.match(/^\((\d(\d(\d(\)(\ (\d(\d(\d(\-(\d(\d(\d(\d)?)?)?)?)?)?)?)?)?)?)?)?)?$/))
+				{
+					return value;
+				}
+				var numbers = value.replace(/[^\d]/gim, '');
+
+				numbers = numbers.replace(/^(\d\d\d)/, '($1) ');
+				numbers = numbers.replace(/^(\(\d\d\d\) \d\d\d)/, '$1-');
+
+				return numbers.slice(0, 14);
+			}
+			var phoneValue = function(value)
+			{
+				return value.replace(/[^\d]/gim, '');
+			}
+			var nameField = new HYDRA.TextField({restrict:/[^0-9\ \(\)-]/gim,  maxlength:14, onKey:phoneNumberFN, getValue:phoneValue});
+			nameField.setValue('3319-234-897')
+			document.getElementById('form').appendChild(nameField.holder);
+			
+			
+			var upcNumberFN = function(value)
+			{
+				if (value.match(/^(\d(\d(\d(\d(\d(\d(\ (\d(\d(\d(\d(\d(\d)?)?)?)?)?)?)?)?)?)?)?)?)?$/))
+				{
+					return value;
+				}
+				var numbers = value.replace(/[^\d]/gim, '');
+
+				numbers = numbers.replace(/^(\d\d\d\d\d\d)/, '$1 ');
+
+				return numbers.slice(0, 14);
+			}
+			var upcValue = function(value)
+			{
+				return value.replace(/[^\d]/gim, '');
+			}
+			var upcField = new HYDRA.TextField({restrict:/[^0-9\ ]/gim,  maxlength:13, onKey:upcNumberFN, getValue:upcValue});
+			upcField.setValue('3319234897')
+			document.getElementById('form').appendChild(upcField.holder);
+			
+			var categoryDropdown = new HYDRA.Dropdown({parser:function(data){
+				return data.categories;
+			}, valueId:'id'});
+			categoryDropdown.load('wallmart.php?request=taxonomy');
+			document.getElementById('form').appendChild(categoryDropdown.holder);
+
+
+			var shipCHBX = new HYDRA.Checkbox({name:'Free Shipping To Store'});
+			document.getElementById('form').appendChild(shipCHBX.holder);
+			
+			HYDRA.DATA.addField(priceField, 'salePrice', 'product');
+			HYDRA.DATA.addField(productNameField, 'name', 'product');
+			HYDRA.DATA.addField(upcField, 'upc', 'product');
+			HYDRA.DATA.addField(shipCHBX, 'freeShipToStore', 'product');
+			HYDRA.DATA.addField(categoryDropdown, 'categoryNode', 'product');
+			
+			
+			/*var table = new HYDRA.Table(listModel);
+			table.load();
+			document.body.appendChild(table.holder);
+			*/
+			loadProduct('038000599231');
+			
+			
+			var searchField = new HYDRA.TextField({placeholder:'Search...'});
+			document.getElementById('form').appendChild(searchField.holder);
+			HYDRA.DATA.addField(searchField, 'query', 'search');
+			
+			var categoryDropdown = new HYDRA.Dropdown({parser:function(data){
+				return data.categories;
+			}, valueId:'id'});
+			categoryDropdown.addItem({name:'All', id:""});
+			categoryDropdown.load('wallmart.php?request=taxonomy');
+			document.getElementById('form').appendChild(categoryDropdown.holder);
+			HYDRA.DATA.addField(categoryDropdown, 'categoryId', 'search');
+			
+			searchTable = new HYDRA.Table(searchModel);
+			searchTable.load(null, {query:'kellogs'});
+			searchTable.previous = function(data)
+			{
+				if (data.page <= 0)
+				{
+					return false;
+				}
+				var params = this.data;
+				params.start = (data.page - 1) * 10 + 1;
+				searchTable.load(null, params);
+			}
+			searchTable.next = function(data)
+			{
+				if (data.page >= data.pages - 1)
+				{
+					return false;
+				}
+				var params = this.data;
+				params.start = (data.page + 1) * 10 + 1;
+				searchTable.load(null, params);
+			}
+			document.body.appendChild(searchTable.holder);
+			
+			
+			var dialog = new Dialog({className:'addPageDialog', title:'Add a New Page', buttons:[
+				{
+					name: 'OK',
+					onclick: function()
+					{
+						this.dispatchEvent(Event.CHANGE);
+						this.close();
+					}
+				},
+				{
+					name: 'CANCEL',
+					onclick: function()
+					{
+						this.close();
+					}
+				}
+			]});
+			dialog.container.innerHTML = '<div style="padding:20px 10px; text-align:center;">' + 'Berto Romero. Estornudos, tatuajes, flora intestinal y maquillaje' + '</div>';
+			dialog.show();
+			document.body.appendChild(dialog.holder);
+
+	
+			
+	
+		}
+		function search()
+		{
+			var params = HYDRA.DATA.getData(['query', 'categoryId'], 'search');
+			searchTable.load(null, params);
+		}
+		//http://api.walmartlabs.com/v1/search?apiKey=gg92a94g25xvwgpk6n9rbjma&query=kellogs
+		function loadProduct(upc)
+		{
+			var json = new JSON_Loader();
+			json.load('wallmart.php?upc=' + upc);
+			json.addEventListener(Event.COMPLETE, 'onLoadProduct', this);
+		}
+		function onLoadProduct(event)
+		{
+			var data = event.currentTarget.data.items[0];
+			data.categoryNode = data.categoryNode.split('_')[0];
+			console.log(data)
+			HYDRA.DATA.apply('product', data);
+		}
+		window.onload = start;
+	</script>
+</head>
+<body style="margin:0;" class="desktop" data-layout="layout">
+	<div onmousedown="search()">Search</div>
+	<div id="form" class="form"></div>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

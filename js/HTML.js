@@ -345,13 +345,15 @@ function RESIZE_DIMS(width, height, areaWidth, areaHeigth, mode, align, resizeSm
 /**
  *	EVENT DISPATCHER, this class implements an event dispatcher which can be added to any object via ADD_EVENT_DISPATCHER(object) global function
  *	@class
- *	@see {@link https://jsfiddle.net/7hsq25n1/} Create a checkbox with event dispatcher
- *	@see {@link https://jsfiddle.net/oxmtu5hn/1/} Tabs Bar demo
+ *	@see {@link https://jsfiddle.net/oxmtu5hn/2/} Tabs Bar demo
  *	@see {@link https://jsfiddle.net/k1v4g5rw/3/} Slider Demo
+*	@see {@link https://jsfiddle.net/7hsq25n1/}   Checkbox
  *  @see {@link https://jsfiddle.net/3fvc6u0h/2/} Dropdown Demo
- *	@see {@link https://jsfiddle.net/skx8px2z/6/} Radio Button Demo
+ *	@see {@link https://jsfiddle.net/skx8px2z/8/} Radio Button Demo
+ *  @see {@link https://jsfiddle.net/gantp3pv/4/} TextField
+ *  @see {@link https://jsfiddle.net/ktahn5ww/1/} Numeric Input
  */
-
+//Label, ImageUploader, Calendar, Hidden, TextArea 
 var Event_Dispatcher = {}
 //https://jsfiddle.net/xkn7xhfn/
 /**
@@ -364,7 +366,10 @@ function ADD_EVENT_DISPATCHER(element)
 {
     Object.extend(element, Event_Dispatcher);
 }
-
+Event_Dispatcher.all = function(array)
+{
+	
+}
 /**
 *	Adds an event listener to the object
 *	@param {string} type The type of event you want to listen to.
@@ -381,43 +386,12 @@ Event_Dispatcher.addEventListener = function(type, listener, scope)
     {
         this.events[type] = new Array();
     }
+	scope = (scope ? scope : this);
     this.events[type].push(
     {
         listener: listener,
         scope: scope
     });
-
-    if (this.events['promise.' + type])
-    {
-        var data = this.events['promise.' + type];
-		if (listener.constructor == Function && !scope)
-		{
-			listener({
-                currentTarget: this,
-                type: type,
-                data: data
-            });
-		}
-        else if ((typeof listener).toString() == "function")
-        {
-            scope.eventRecieverFunction = listener;
-            scope.eventRecieverFunction(
-            {
-                currentTarget: this,
-                type: type,
-                data: data
-            });
-        }
-        else
-        {
-            scope[listener](
-            {
-                currentTarget: this,
-                type: type,
-                data: data
-            });
-        }
-    }
 }
 
 /**
@@ -425,15 +399,11 @@ Event_Dispatcher.addEventListener = function(type, listener, scope)
 *	@param {string} type The type of event to fire
 *	@param {object} data The data that will be attached to the event, the objects listening will get this data via event.data
 */
-Event_Dispatcher.dispatchEvent = function(type, data, promise)
+Event_Dispatcher.dispatchEvent = function(type, data)
 {
     if (!this.events)
     {
         this.events = {};
-    }
-    if (promise)
-    {
-        this.events['promise.' + type] = data;
     }
     if (this.events[type])
     {
