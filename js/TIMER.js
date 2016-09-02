@@ -359,11 +359,12 @@ Scroll.go = function(position, scrollTop)
 	}
 	
 	Scroll.end = position;
-	
+	console.log(Scroll.start, Scroll.end)
 	Scroll.timeLine.duration = Math.min(Math.max(200, Math.abs(Scroll.end - Scroll.start) * 1.5), 1500);
 	Scroll.timeLine.position = 0;
 	Scroll.timeLine.play();
 }
+
 Scroll.refresh = function()
 {
 	var position = Scroll.start + (Scroll.end - Scroll.start) * Scroll.timeLine.getTime(0, Scroll.timeLine.duration);
